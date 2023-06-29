@@ -1,12 +1,15 @@
 package com.cciocau.goose.data;
 
+import javax.measure.Quantity;
+import javax.measure.quantity.Length;
+
 public class Position {
     private final double latitude;
     private final double longitude;
-    private final double altitude;
+    private final Quantity<Length> altitude;
     private final int accuracy;
 
-    public Position(double latitude, double longitude, double altitude, int accuracy) {
+    public Position(double latitude, double longitude, Quantity<Length> altitude, int accuracy) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
@@ -21,7 +24,7 @@ public class Position {
         return longitude;
     }
 
-    public double getAltitude() {
+    public Quantity<Length> getAltitude() {
         return altitude;
     }
 

@@ -16,6 +16,8 @@ import com.cciocau.goose.protocol.gdl90.OwnShip;
 import com.cciocau.goose.protocol.gdl90.OwnShipGeometricAltitude;
 import com.cciocau.goose.protocol.gdl90.foreflight.ForeFlightMessageId;
 import com.google.common.collect.EvictingQueue;
+import tech.units.indriya.quantity.Quantities;
+import tech.units.indriya.unit.Units;
 
 import java.net.Socket;
 import java.util.ArrayList;
@@ -93,8 +95,8 @@ public class Goose {
 
         var position = queueItem
                 .map(GpsData::getPosition)
-                .map(gpsPosition -> new Position(gpsPosition.getLatitude(), gpsPosition.getLongitude(), 0, gpsPosition.getAccuracy()))
-                .orElseGet(() -> new Position(0, 0, 0, 0));
+                .map(gpsPosition -> new Position(gpsPosition.getLatitude(), gpsPosition.getLongitude(), gpsPosition.getAltitude(), gpsPosition.getAccuracy()))
+                .orElseGet(() -> new Position(0, 0, Quantities.getQuantity(0, Units.METRE), 0));
 
         var speed = queueItem
                 .flatMap(GpsData::getSpeed);
@@ -111,7 +113,7 @@ public class Goose {
         client.sendOwnShip(new OwnShip(aircraft));
 
         queueItem.map(GpsData::getPosition)
-                .map(GpsPosition::getAltitudeFeet)
+                .map(GpsPosition::getAltitude)
                 .map(OwnShipGeometricAltitude::new)
                 .ifPresent(client::sendGeometricAltitude);
     }
