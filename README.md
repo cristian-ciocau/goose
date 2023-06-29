@@ -1,2 +1,2 @@
 # goose
-Goose is a conspicuity software delivering flight data to your Electronic Flight Bag
+Goose is your favourite RIO delivering flight data to your Electronic Flight Bag.
