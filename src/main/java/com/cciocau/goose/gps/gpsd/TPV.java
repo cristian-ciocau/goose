@@ -1,10 +1,12 @@
 package com.cciocau.goose.gps.gpsd;
 
 import com.google.gson.annotations.SerializedName;
+import tech.units.indriya.ComparableQuantity;
 import tech.units.indriya.quantity.Quantities;
 import tech.units.indriya.unit.Units;
 
 import javax.measure.Quantity;
+import javax.measure.quantity.Length;
 import javax.measure.quantity.Speed;
 import java.util.Optional;
 
@@ -26,6 +28,14 @@ public class TPV extends GpsdResponse {
     @SerializedName("altHAE")
     private Double altHAE;
 
+    // Latitude error estimate in meters. Certainty unknown.
+    @SerializedName("epx")
+    private double estimatedLatitudeError;
+
+    // Longitude error estimate in meters. Certainty unknown.
+    @SerializedName("epy")
+    private double estimatedLongitudeError;
+
     // Climb (positive) or sink (negative) rate, meters per second.
     @SerializedName("climb")
     private double climbRate;
@@ -46,8 +56,20 @@ public class TPV extends GpsdResponse {
         return lon;
     }
 
-    public double getAlt() {
+    public Quantity<Length> getAltitude() {
+        return Quantities.getQuantity(getAltitudeMeters(), Units.METRE);
+    }
+
+    private double getAltitudeMeters() {
         return Optional.ofNullable(altHAE).orElse(alt);
+    }
+
+    public ComparableQuantity<Length> getLatError() {
+        return Quantities.getQuantity(estimatedLatitudeError, Units.METRE);
+    }
+
+    public ComparableQuantity<Length> getLonError() {
+        return Quantities.getQuantity(estimatedLongitudeError, Units.METRE);
     }
 
     public double getClimbRate() {

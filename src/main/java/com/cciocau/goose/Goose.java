@@ -60,9 +60,9 @@ public class Goose {
         executorService.schedule(listener::listen, 0, TimeUnit.SECONDS);
 
         // EFB Sender
-//        executorService.scheduleAtFixedRate(() -> {
-//            System.out.println(repository.getAll());
-//        }, 0, 1, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(() -> {
+            System.out.println(repository.getAll());
+        }, 0, 1, TimeUnit.SECONDS);
 
         executorService.scheduleAtFixedRate(() -> {
             try {
@@ -95,8 +95,8 @@ public class Goose {
 
         var position = queueItem
                 .map(GpsData::getPosition)
-                .map(gpsPosition -> new Position(gpsPosition.getLatitude(), gpsPosition.getLongitude(), gpsPosition.getAltitude(), gpsPosition.getAccuracy()))
-                .orElseGet(() -> new Position(0, 0, Quantities.getQuantity(0, Units.METRE), 0));
+                .map(gpsPosition -> new Position(gpsPosition.getLatitude(), gpsPosition.getLongitude(), gpsPosition.getAltitude(), gpsPosition.getLatitudeError(), gpsPosition.getLongitudeError()))
+                .orElseGet(() -> new Position(0, 0, Quantities.getQuantity(0, Units.METRE), Quantities.getQuantity(0, Units.METRE), Quantities.getQuantity(0, Units.METRE)));
 
         var speed = queueItem
                 .flatMap(GpsData::getSpeed);

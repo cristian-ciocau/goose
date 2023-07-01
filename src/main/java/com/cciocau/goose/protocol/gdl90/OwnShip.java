@@ -4,6 +4,7 @@ import com.cciocau.goose.data.Aircraft;
 import com.cciocau.goose.data.Track;
 import com.cciocau.goose.data.TrackType;
 import systems.uom.common.USCustomary;
+import tech.units.indriya.ComparableQuantity;
 
 import javax.measure.Quantity;
 
@@ -67,8 +68,12 @@ public class OwnShip implements Message {
                 .filter(track -> track.getType() == TrackType.TRUE)
                 .ifPresent(value -> msg[12] = (byte)(Byte.toUnsignedInt(msg[12]) | 1));
 
-//        msg[13] = -87;
-        msg[13] = (byte) aircraft.getPosition().getAccuracy();
+        var horizontalPositionError = min(aircraft.getPosition().getLatitudeError(), aircraft.getPosition().getLongitudeError());
+
+        var hpl = 0xB0;
+        var hfom = HFOM.from(horizontalPositionError).getValue();
+
+        msg[13] = (byte) Integer.toUnsignedLong(hpl | hfom);
 
         aircraft.getSpeed()
                 .map(quantity -> quantity.to(USCustomary.KNOT))
@@ -112,6 +117,15 @@ public class OwnShip implements Message {
 
         msg[27] = 0;
         return msg;
+    }
+
+    private <T extends Quantity<T>> ComparableQuantity<T> min(ComparableQuantity<T> one, ComparableQuantity<T> two) {
+        if (one.isLessThan(two)) {
+            return one;
+
+        } else {
+            return two;
+        }
     }
 
     @Override

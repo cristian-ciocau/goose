@@ -1,5 +1,7 @@
 package com.cciocau.goose.gps;
 
+import tech.units.indriya.ComparableQuantity;
+
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
@@ -7,13 +9,17 @@ public class GpsPosition {
     private final double latitude;
     private final double longitude;
     private final Quantity<Length> altitude;
-    private final int accuracy;
 
-    public GpsPosition(double latitude, double longitude, Quantity<Length> altitude, int accuracy) {
+    private final ComparableQuantity<Length> latitudeError;
+    private final ComparableQuantity<Length> longitudeError;
+
+    public GpsPosition(double latitude, double longitude, Quantity<Length> altitude, ComparableQuantity<Length> latitudeError, ComparableQuantity<Length> longitudeError) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
-        this.accuracy = accuracy;
+
+        this.latitudeError = latitudeError;
+        this.longitudeError = longitudeError;
     }
 
     public double getLatitude() {
@@ -28,8 +34,12 @@ public class GpsPosition {
         return altitude;
     }
 
-    public int getAccuracy() {
-        return accuracy;
+    public ComparableQuantity<Length> getLatitudeError() {
+        return latitudeError;
+    }
+
+    public ComparableQuantity<Length> getLongitudeError() {
+        return longitudeError;
     }
 
     @Override
@@ -38,7 +48,8 @@ public class GpsPosition {
                 "latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", altitude=" + altitude +
-                ", accuracy=" + accuracy +
+                ", latitudeError=" + latitudeError +
+                ", longitudeError=" + longitudeError +
                 '}';
     }
 }

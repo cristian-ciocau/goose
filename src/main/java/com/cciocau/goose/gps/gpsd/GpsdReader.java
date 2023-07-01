@@ -8,8 +8,6 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
-import tech.units.indriya.quantity.Quantities;
-import tech.units.indriya.unit.Units;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -62,9 +60,7 @@ public class GpsdReader implements GPSReader {
     }
 
     private GpsData toGpsData(TPV tpv) {
-        var altitude = Quantities.getQuantity(tpv.getAlt(), Units.METRE);
-
-        var position = new GpsPosition(tpv.getLat(), tpv.getLon(), altitude, 0xBA);
+        var position = new GpsPosition(tpv.getLat(), tpv.getLon(), tpv.getAltitude(), tpv.getLatError(), tpv.getLonError());
 
         var track = tpv.getTrack().orElse(null);
         var speed = tpv.getSpeed();
