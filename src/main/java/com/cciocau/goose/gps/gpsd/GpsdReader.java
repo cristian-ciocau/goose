@@ -60,7 +60,7 @@ public class GpsdReader implements GPSReader {
     }
 
     private GpsData toGpsData(TPV tpv) {
-        var position = new GpsPosition(tpv.getLat(), tpv.getLon(), tpv.getAltitude(), tpv.getLatError(), tpv.getLonError());
+        var position = new GpsPosition(tpv.getLat(), tpv.getLon(), tpv.getLatError(), tpv.getLonError(), tpv.getAltitude(), tpv.getVerticalError());
 
         var track = tpv.getTrack().orElse(null);
         var speed = tpv.getSpeed();

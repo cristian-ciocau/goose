@@ -8,18 +8,20 @@ import javax.measure.quantity.Length;
 public class GpsPosition {
     private final double latitude;
     private final double longitude;
-    private final Quantity<Length> altitude;
-
     private final ComparableQuantity<Length> latitudeError;
     private final ComparableQuantity<Length> longitudeError;
 
-    public GpsPosition(double latitude, double longitude, Quantity<Length> altitude, ComparableQuantity<Length> latitudeError, ComparableQuantity<Length> longitudeError) {
+    private final Quantity<Length> altitude;
+    private final ComparableQuantity<Length> verticalError;
+
+    public GpsPosition(double latitude, double longitude, ComparableQuantity<Length> latitudeError, ComparableQuantity<Length> longitudeError, Quantity<Length> altitude, ComparableQuantity<Length> verticalError) {
         this.latitude = latitude;
         this.longitude = longitude;
-        this.altitude = altitude;
-
         this.latitudeError = latitudeError;
         this.longitudeError = longitudeError;
+
+        this.altitude = altitude;
+        this.verticalError = verticalError;
     }
 
     public double getLatitude() {
@@ -30,10 +32,6 @@ public class GpsPosition {
         return longitude;
     }
 
-    public Quantity<Length> getAltitude() {
-        return altitude;
-    }
-
     public ComparableQuantity<Length> getLatitudeError() {
         return latitudeError;
     }
@@ -42,14 +40,23 @@ public class GpsPosition {
         return longitudeError;
     }
 
+    public Quantity<Length> getAltitude() {
+        return altitude;
+    }
+
+    public ComparableQuantity<Length> getVerticalError() {
+        return verticalError;
+    }
+
     @Override
     public String toString() {
         return "GpsPosition{" +
                 "latitude=" + latitude +
                 ", longitude=" + longitude +
-                ", altitude=" + altitude +
                 ", latitudeError=" + latitudeError +
                 ", longitudeError=" + longitudeError +
+                ", altitude=" + altitude +
+                ", verticalError=" + verticalError +
                 '}';
     }
 }

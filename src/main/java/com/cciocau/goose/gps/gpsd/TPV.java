@@ -20,6 +20,14 @@ public class TPV extends GpsdResponse {
     @SerializedName("lon")
     private double lon;
 
+    // Latitude error estimate in meters. Certainty unknown.
+    @SerializedName("epx")
+    private double estimatedLatitudeError;
+
+    // Longitude error estimate in meters. Certainty unknown.
+    @SerializedName("epy")
+    private double estimatedLongitudeError;
+
     // Deprecated. Undefined. Use altHAE.
     @SerializedName("alt")
     private double alt;
@@ -28,13 +36,9 @@ public class TPV extends GpsdResponse {
     @SerializedName("altHAE")
     private Double altHAE;
 
-    // Latitude error estimate in meters. Certainty unknown.
-    @SerializedName("epx")
-    private double estimatedLatitudeError;
-
-    // Longitude error estimate in meters. Certainty unknown.
-    @SerializedName("epy")
-    private double estimatedLongitudeError;
+    // Estimated vertical error in meters. Certainty unknown.
+    @SerializedName("epv")
+    private double estimatedVerticalError;
 
     // Climb (positive) or sink (negative) rate, meters per second.
     @SerializedName("climb")
@@ -56,6 +60,14 @@ public class TPV extends GpsdResponse {
         return lon;
     }
 
+    public ComparableQuantity<Length> getLatError() {
+        return Quantities.getQuantity(estimatedLatitudeError, Units.METRE);
+    }
+
+    public ComparableQuantity<Length> getLonError() {
+        return Quantities.getQuantity(estimatedLongitudeError, Units.METRE);
+    }
+
     public Quantity<Length> getAltitude() {
         return Quantities.getQuantity(getAltitudeMeters(), Units.METRE);
     }
@@ -64,12 +76,8 @@ public class TPV extends GpsdResponse {
         return Optional.ofNullable(altHAE).orElse(alt);
     }
 
-    public ComparableQuantity<Length> getLatError() {
-        return Quantities.getQuantity(estimatedLatitudeError, Units.METRE);
-    }
-
-    public ComparableQuantity<Length> getLonError() {
-        return Quantities.getQuantity(estimatedLongitudeError, Units.METRE);
+    public ComparableQuantity<Length> getVerticalError() {
+        return Quantities.getQuantity(estimatedVerticalError, Units.METRE);
     }
 
     public double getClimbRate() {

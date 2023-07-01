@@ -6,7 +6,6 @@ import com.cciocau.goose.gps.GpsData;
 import com.cciocau.goose.efb.EFBRepository;
 import com.cciocau.goose.efb.EFBType;
 import com.cciocau.goose.efb.foreflight.ForeFlightListener;
-import com.cciocau.goose.gps.GpsPosition;
 import com.cciocau.goose.output.CombinedEFBClient;
 import com.cciocau.goose.output.ConsoleEFBClient;
 import com.cciocau.goose.output.EFBClient;
@@ -28,8 +27,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Goose {
-//    private static final String GPS_HOST = "localhost";
-    private static final String GPS_HOST = "192.168.10.1";
+    private static final String GPS_HOST = "localhost";
+//    private static final String GPS_HOST = "192.168.10.1";
 
     public static void main(String[] args) {
         var repository = new EFBRepository();
@@ -113,8 +112,7 @@ public class Goose {
         client.sendOwnShip(new OwnShip(aircraft));
 
         queueItem.map(GpsData::getPosition)
-                .map(GpsPosition::getAltitude)
-                .map(OwnShipGeometricAltitude::new)
+                .map(gpsPosition -> new OwnShipGeometricAltitude(gpsPosition.getAltitude(), gpsPosition.getVerticalError()))
                 .ifPresent(client::sendGeometricAltitude);
     }
 }
