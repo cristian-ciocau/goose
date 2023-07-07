@@ -1,73 +1,51 @@
 package com.cciocau.goose;
 
-import com.cciocau.goose.data.*;
-import com.cciocau.goose.gps.gpsd.GpsdReader;
-import com.cciocau.goose.gps.GpsData;
-import com.cciocau.goose.efb.EFBRepository;
+import com.cciocau.goose.efb.EFBService;
+import com.cciocau.goose.output.*;
+import com.cciocau.goose.sensor.SensorManager;
+import com.cciocau.goose.sensor.gps.GpsData;
 import com.cciocau.goose.efb.EFBType;
-import com.cciocau.goose.efb.foreflight.ForeFlightListener;
-import com.cciocau.goose.output.CombinedEFBClient;
-import com.cciocau.goose.output.ConsoleEFBClient;
-import com.cciocau.goose.output.EFBClient;
-import com.cciocau.goose.output.ForeFlightClient;
-import com.cciocau.goose.protocol.gdl90.Heartbeat;
-import com.cciocau.goose.protocol.gdl90.OwnShip;
-import com.cciocau.goose.protocol.gdl90.OwnShipGeometricAltitude;
-import com.cciocau.goose.protocol.gdl90.foreflight.ForeFlightMessageId;
-import com.google.common.collect.EvictingQueue;
-import tech.units.indriya.quantity.Quantities;
-import tech.units.indriya.unit.Units;
+import com.cciocau.goose.sensor.gps.gpsd.GpsdReceiver;
 
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Goose {
-    private static final String GPS_HOST = "localhost";
-//    private static final String GPS_HOST = "192.168.10.1";
 
     public static void main(String[] args) {
-        var repository = new EFBRepository();
-        var listener = new ForeFlightListener(repository);
+        var efbService = new EFBService();
+        SensorManager<GpsData> gpsSensorManager = new SensorManager<>();
 
-        Queue<GpsData> queue = EvictingQueue.create(2);
+        var gpsReceiver = new GpsdReceiver(gpsSensorManager);
+
+        BlockingQueue<GpsData> queue = new ArrayBlockingQueue<>(20);
+
+        gpsSensorManager.subscribe(data -> {
+            var result = queue.offer(data);
+
+            System.out.println("Queue GPS data accept=" + result);
+        });
 
         var executorService = Executors.newScheduledThreadPool(10);
 
         // GPS Listener
-        executorService.schedule(() -> {
-            try (var socket = new Socket(GPS_HOST, 2947)) {
-                socket.getOutputStream().write("?WATCH={\"enable\":true,\"json\":true}\r\n".getBytes());
+        executorService.schedule(gpsReceiver::receive, 0, TimeUnit.SECONDS);
 
-                var input = socket.getInputStream();
-
-                var reader = new GpsdReader(input);
-                var stream = reader.read();
-
-                stream.forEach(queue::add);
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }, 0, TimeUnit.SECONDS);
-
-        // ForeFlight Listener
-        executorService.schedule(listener::listen, 0, TimeUnit.SECONDS);
+//        executorService.scheduleAtFixedRate(() -> {
+//            System.out.println(repository.getAll());
+//        }, 0, 1, TimeUnit.SECONDS);
 
         // EFB Sender
-        executorService.scheduleAtFixedRate(() -> {
-            System.out.println(repository.getAll());
-        }, 0, 1, TimeUnit.SECONDS);
-
         executorService.scheduleAtFixedRate(() -> {
             try {
                 final List<EFBClient> clients = new ArrayList<>();
 
-                repository.getByType(EFBType.FOREFLIGHT)
+                efbService.getFlightBags(EFBType.FOREFLIGHT)
                         .stream()
                         .map(efb -> new ForeFlightClient(efb.getAddress()))
                         .forEach(clients::add);
@@ -75,8 +53,11 @@ public class Goose {
                 clients.add(new ConsoleEFBClient());
 
                 var combinedClient = new CombinedEFBClient(clients);
+                var sender = new ForeFlightSender(combinedClient);
 
-                send(combinedClient, queue);
+                var gpsData = Optional.ofNullable(getLast(queue));
+                sender.send(gpsData);
+
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -85,34 +66,19 @@ public class Goose {
         }, 0, 1, TimeUnit.SECONDS);
     }
 
-    private static void send(EFBClient client, Queue<GpsData> queue) {
-        client.sendHeartbeat(new Heartbeat());
+    private static <T> T getLast(BlockingQueue<T> queue) {
+        var item = queue.poll();
 
-        client.sendMessageId(new ForeFlightMessageId("Goose"));
+        if (item != null) {
+            var temp = queue.poll();
 
-        var queueItem = Optional.ofNullable(queue.poll());
+            if (temp == null) {
+                return item;
+            }
 
-        var position = queueItem
-                .map(GpsData::getPosition)
-                .map(gpsPosition -> new Position(gpsPosition.getLatitude(), gpsPosition.getLongitude(), gpsPosition.getAltitude(), gpsPosition.getLatitudeError(), gpsPosition.getLongitudeError()))
-                .orElseGet(() -> new Position(0, 0, Quantities.getQuantity(0, Units.METRE), Quantities.getQuantity(0, Units.METRE), Quantities.getQuantity(0, Units.METRE)));
+            item = temp;
+        }
 
-        var speed = queueItem
-                .flatMap(GpsData::getSpeed);
-
-        var track = queueItem
-                .flatMap(GpsData::getTrack)
-                .map(Double::intValue)
-                .map(value -> new Track(TrackType.TRUE, value))
-                .orElse(null);
-
-        var aircraft = new Aircraft(0x404C21, IcaoAircraftCategory.LIGHT, "GOOSE", track, speed, position);
-
-
-        client.sendOwnShip(new OwnShip(aircraft));
-
-        queueItem.map(GpsData::getPosition)
-                .map(gpsPosition -> new OwnShipGeometricAltitude(gpsPosition.getAltitude(), gpsPosition.getVerticalError()))
-                .ifPresent(client::sendGeometricAltitude);
+        return item;
     }
 }

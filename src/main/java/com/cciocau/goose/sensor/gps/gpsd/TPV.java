@@ -1,4 +1,4 @@
-package com.cciocau.goose.gps.gpsd;
+package com.cciocau.goose.sensor.gps.gpsd;
 
 import com.google.gson.annotations.SerializedName;
 import tech.units.indriya.ComparableQuantity;

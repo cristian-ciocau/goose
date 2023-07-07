@@ -1,4 +1,4 @@
-package com.cciocau.goose.gps;
+package com.cciocau.goose.sensor.gps;
 
 import tech.units.indriya.ComparableQuantity;
 

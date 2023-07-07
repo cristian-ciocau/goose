@@ -46,13 +46,13 @@ public class ForeFlightListener implements EFBListener {
                     efbRepository.add(efb);
 
                 } catch (SocketTimeoutException exception) {
-                    // TODO
+                    // probably will be ignored
                 }
             }
 
             socket.close();
         } catch (Exception exception) {
-            // TODO
+            exception.printStackTrace();
         }
     }
 

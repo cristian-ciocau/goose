@@ -51,8 +51,8 @@ public class Aircraft {
         return speed;
     }
 
-    public Position getPosition() {
-        return position;
+    public Optional<Position> getPosition() {
+        return Optional.ofNullable(position);
     }
 
     public Optional<PressureAltitude> getPressureAltitude() {

@@ -34,14 +34,25 @@ public class OwnShip implements Message {
 
         Bytes.writeInt(msg, 2, 3, aircraft.getIcaoAddress());
 
-        byte[] tmp = makeLatLng(aircraft.getPosition().getLatitude());
-        msg[5] = tmp[0];
-        msg[6] = tmp[1];
-        msg[7] = tmp[2];
-        tmp = makeLatLng(aircraft.getPosition().getLongitude());
-        msg[8] = tmp[0];
-        msg[9] = tmp[1];
-        msg[10] = tmp[2];
+        aircraft.getPosition()
+                .ifPresentOrElse(pos -> {
+                    byte[] tmp = makeLatLng(pos.getLatitude());
+                    msg[5] = tmp[0];
+                    msg[6] = tmp[1];
+                    msg[7] = tmp[2];
+                    tmp = makeLatLng(pos.getLongitude());
+                    msg[8] = tmp[0];
+                    msg[9] = tmp[1];
+                    msg[10] = tmp[2];
+                },
+                () -> {
+                    msg[5] = 0;
+                    msg[6] = 0;
+                    msg[7] = 0;
+                    msg[8] = 0;
+                    msg[9] = 0;
+                    msg[10] = 0;
+                });
 
 //        int alt;
 //        if (altitude >= -1000 && altitude <= 101350) {
@@ -68,12 +79,17 @@ public class OwnShip implements Message {
                 .filter(track -> track.getType() == TrackType.TRUE)
                 .ifPresent(value -> msg[12] = (byte)(Byte.toUnsignedInt(msg[12]) | 1));
 
-        var horizontalPositionError = min(aircraft.getPosition().getLatitudeError(), aircraft.getPosition().getLongitudeError());
+        aircraft.getPosition()
+                .ifPresentOrElse(pos -> {
+                    var horizontalPositionError = min(pos.getLatitudeError(), pos.getLongitudeError());
 
-        var hpl = 0xB0;
-        var hfom = HFOM.from(horizontalPositionError).getValue();
+                    var hpl = 0xB0;
+                    var hfom = HFOM.from(horizontalPositionError).getValue();
 
-        msg[13] = (byte) Integer.toUnsignedLong(hpl | hfom);
+                    msg[13] = (byte) Integer.toUnsignedLong(hpl | hfom);
+                }, () -> {
+                    msg[13] = 0;
+                });
 
         aircraft.getSpeed()
                 .map(quantity -> quantity.to(USCustomary.KNOT))

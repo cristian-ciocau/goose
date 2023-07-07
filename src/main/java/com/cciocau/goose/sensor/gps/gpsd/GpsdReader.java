@@ -1,8 +1,8 @@
-package com.cciocau.goose.gps.gpsd;
+package com.cciocau.goose.sensor.gps.gpsd;
 
-import com.cciocau.goose.gps.GPSReader;
-import com.cciocau.goose.gps.GpsData;
-import com.cciocau.goose.gps.GpsPosition;
+import com.cciocau.goose.sensor.gps.GPSReader;
+import com.cciocau.goose.sensor.gps.GpsData;
+import com.cciocau.goose.sensor.gps.GpsPosition;
 import com.google.gson.Gson;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
