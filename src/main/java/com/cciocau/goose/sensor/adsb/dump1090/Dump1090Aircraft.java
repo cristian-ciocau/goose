@@ -8,6 +8,7 @@ import tech.units.indriya.quantity.Quantities;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Speed;
+import java.time.Duration;
 import java.util.Objects;
 
 public class Dump1090Aircraft {
@@ -44,6 +45,9 @@ public class Dump1090Aircraft {
 
     @SerializedName("nac_v")
     private int verticalNAC;
+
+    @SerializedName("seen")
+    private float lastSeenSeconds;
 
     public String getIcaoHexId() {
         return icaoHexId;
@@ -89,7 +93,15 @@ public class Dump1090Aircraft {
         return verticalNAC;
     }
 
+    public Duration getLastSeen() {
+        return Duration.ofSeconds((long) lastSeenSeconds);
+    }
+
     public boolean valid() {
         return Objects.nonNull(latitude) && Objects.nonNull(longitude);
+    }
+
+    public boolean isObservedRecently(Duration maxSeenDuration) {
+        return getLastSeen().minus(maxSeenDuration).isNegative();
     }
 }

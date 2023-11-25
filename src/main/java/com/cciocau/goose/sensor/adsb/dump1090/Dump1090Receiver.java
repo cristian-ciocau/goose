@@ -48,6 +48,7 @@ public class Dump1090Receiver {
         var aircraft = event.getAircraftList()
                 .stream()
                 .filter(Dump1090Aircraft::valid)
+                .filter(dumpAircraft -> dumpAircraft.isObservedRecently(config.getAircraftMaxLastSeen()))
                 .map(this::aircraft)
                 .collect(Collectors.toList());
 
