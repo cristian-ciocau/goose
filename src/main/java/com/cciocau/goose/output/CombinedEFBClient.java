@@ -3,6 +3,7 @@ package com.cciocau.goose.output;
 import com.cciocau.goose.protocol.gdl90.Heartbeat;
 import com.cciocau.goose.protocol.gdl90.OwnShip;
 import com.cciocau.goose.protocol.gdl90.OwnShipGeometricAltitude;
+import com.cciocau.goose.protocol.gdl90.TrafficReport;
 import com.cciocau.goose.protocol.gdl90.foreflight.ForeFlightMessageId;
 
 import java.util.List;
@@ -32,5 +33,10 @@ public class CombinedEFBClient implements EFBClient {
     @Override
     public void sendGeometricAltitude(OwnShipGeometricAltitude geometricAltitude) {
         clients.forEach(client -> client.sendGeometricAltitude(geometricAltitude));
+    }
+
+    @Override
+    public void sendTrafficReport(TrafficReport trafficReport) {
+        clients.forEach(client -> client.sendTrafficReport(trafficReport));
     }
 }

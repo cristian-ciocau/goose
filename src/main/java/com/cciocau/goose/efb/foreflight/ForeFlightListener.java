@@ -5,16 +5,25 @@ import com.cciocau.goose.efb.EFBListener;
 import com.cciocau.goose.efb.EFBRepository;
 import com.cciocau.goose.efb.EFBType;
 import com.google.gson.Gson;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.*;
 
 public class ForeFlightListener implements EFBListener {
-    private static final int FF_BROADCAST_PORT = 63093;
-    private boolean keepReceiving = true;
+    private static final Logger logger = LogManager.getLogger(ForeFlightListener.class);
 
+    private final ForeFlightConfig config;
     private final EFBRepository efbRepository;
 
+    private boolean keepReceiving = true;
+
     public ForeFlightListener(EFBRepository efbRepository) {
+        this(new ForeFlightConfig(), efbRepository);
+    }
+
+    public ForeFlightListener(ForeFlightConfig config, EFBRepository efbRepository) {
+        this.config = config;
         this.efbRepository = efbRepository;
     }
 
@@ -23,7 +32,7 @@ public class ForeFlightListener implements EFBListener {
         DatagramPacket dp = new DatagramPacket(buf, buf.length);
 
         try {
-            var socket = new DatagramSocket(FF_BROADCAST_PORT);
+            var socket = new DatagramSocket(config.getBroadcastPort());
             socket.setSoTimeout(5000);
 
             while (keepReceiving) {
@@ -52,7 +61,7 @@ public class ForeFlightListener implements EFBListener {
 
             socket.close();
         } catch (Exception exception) {
-            exception.printStackTrace();
+            logger.error("Failed to receive ForeFlight broadcast - {}", exception.getMessage());
         }
     }
 

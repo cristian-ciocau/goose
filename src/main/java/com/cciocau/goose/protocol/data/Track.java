@@ -1,10 +1,13 @@
-package com.cciocau.goose.data;
+package com.cciocau.goose.protocol.data;
+
+import javax.measure.Quantity;
+import javax.measure.quantity.Angle;
 
 public class Track {
     private final TrackType type;
-    private final int value;
+    private final Quantity<Angle> value;
 
-    public Track(TrackType type, int value) {
+    public Track(TrackType type, Quantity<Angle> value) {
         this.type = type;
         this.value = value;
     }
@@ -13,7 +16,7 @@ public class Track {
         return type;
     }
 
-    public int getValue() {
+    public Quantity<Angle> getValue() {
         return value;
     }
 

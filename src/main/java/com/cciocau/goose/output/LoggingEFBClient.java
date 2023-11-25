@@ -3,19 +3,14 @@ package com.cciocau.goose.output;
 import com.cciocau.goose.protocol.gdl90.Heartbeat;
 import com.cciocau.goose.protocol.gdl90.OwnShip;
 import com.cciocau.goose.protocol.gdl90.OwnShipGeometricAltitude;
+import com.cciocau.goose.protocol.gdl90.TrafficReport;
 import com.cciocau.goose.protocol.gdl90.foreflight.ForeFlightMessageId;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.Optional;
 
-public class ConsoleEFBClient implements EFBClient {
-    private final Gson gson;
-
-    public ConsoleEFBClient() {
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(Optional.class, new GsonOptionalSerDes<>()).create();
-    }
+public class LoggingEFBClient implements EFBClient {
+    private static final Logger logger = LogManager.getLogger(LoggingEFBClient.class);
 
     @Override
     public void sendHeartbeat(Heartbeat heartbeat) {
@@ -37,9 +32,12 @@ public class ConsoleEFBClient implements EFBClient {
         log(geometricAltitude);
     }
 
-    private void log(Object data) {
-//        var json = gson.toJson(data);
+    @Override
+    public void sendTrafficReport(TrafficReport trafficReport) {
+        log(trafficReport);
+    }
 
-        System.out.println(data.toString());
+    private void log(Object data) {
+        logger.info(data.toString());
     }
 }

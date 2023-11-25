@@ -1,9 +1,6 @@
 package com.cciocau.goose.output;
 
-import com.cciocau.goose.protocol.gdl90.GDL90Client;
-import com.cciocau.goose.protocol.gdl90.Heartbeat;
-import com.cciocau.goose.protocol.gdl90.OwnShip;
-import com.cciocau.goose.protocol.gdl90.OwnShipGeometricAltitude;
+import com.cciocau.goose.protocol.gdl90.*;
 import com.cciocau.goose.protocol.gdl90.foreflight.ForeFlightMessageId;
 
 import java.net.InetSocketAddress;
@@ -29,5 +26,10 @@ public class ForeFlightClient implements EFBClient {
 
     public void sendGeometricAltitude(OwnShipGeometricAltitude geometricAltitude) {
         gdl90Client.send(geometricAltitude.generate());
+    }
+
+    @Override
+    public void sendTrafficReport(TrafficReport trafficReport) {
+        gdl90Client.send(trafficReport.generate());
     }
 }

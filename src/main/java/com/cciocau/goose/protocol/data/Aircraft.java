@@ -1,6 +1,7 @@
-package com.cciocau.goose.data;
+package com.cciocau.goose.protocol.data;
 
 import javax.measure.Quantity;
+import javax.measure.quantity.Length;
 import javax.measure.quantity.Speed;
 import java.util.Optional;
 
@@ -15,13 +16,13 @@ public class Aircraft {
 
     private final Position position;
 
-    private final PressureAltitude pressureAltitude;
+    private final Quantity<Length> pressureAltitude;
 
     public Aircraft(int icaoAddress, IcaoAircraftCategory icaoCategory, String callSign, Track track, Optional<Quantity<Speed>> speed, Position position) {
         this(icaoAddress, icaoCategory, callSign, track, speed, position, null);
     }
 
-    public Aircraft(int icaoAddress, IcaoAircraftCategory icaoCategory, String callSign, Track track, Optional<Quantity<Speed>> speed, Position position, PressureAltitude pressureAltitude) {
+    public Aircraft(int icaoAddress, IcaoAircraftCategory icaoCategory, String callSign, Track track, Optional<Quantity<Speed>> speed, Position position, Quantity<Length> pressureAltitude) {
         this.icaoAddress = icaoAddress;
         this.icaoCategory = icaoCategory;
         this.callSign = callSign;
@@ -51,11 +52,11 @@ public class Aircraft {
         return speed;
     }
 
-    public Optional<Position> getPosition() {
-        return Optional.ofNullable(position);
+    public Position getPosition() {
+        return position;
     }
 
-    public Optional<PressureAltitude> getPressureAltitude() {
+    public Optional<Quantity<Length>> getPressureAltitude() {
         return Optional.ofNullable(pressureAltitude);
     }
 

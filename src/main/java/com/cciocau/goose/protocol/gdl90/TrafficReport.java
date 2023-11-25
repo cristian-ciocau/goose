@@ -2,13 +2,13 @@ package com.cciocau.goose.protocol.gdl90;
 
 import com.cciocau.goose.protocol.data.Aircraft;
 
-public class OwnShip extends BaseTrafficReport implements Message {
-    private static final byte OWN_SHIP_MESSAGE_TYPE = 10;
+public class TrafficReport extends BaseTrafficReport implements Message {
+    private static final byte TRAFFIC_REPORT_MESSAGE_TYPE = 20;
 
     private final Aircraft aircraft;
 
-    public OwnShip(Aircraft aircraft) {
-        super(OWN_SHIP_MESSAGE_TYPE);
+    public TrafficReport(Aircraft aircraft) {
+        super(TRAFFIC_REPORT_MESSAGE_TYPE);
 
         this.aircraft = aircraft;
     }
@@ -20,7 +20,7 @@ public class OwnShip extends BaseTrafficReport implements Message {
 
     @Override
     public String toString() {
-        return "OwnShip{" +
+        return "TrafficReport{" +
                 "aircraft=" + aircraft +
                 '}';
     }

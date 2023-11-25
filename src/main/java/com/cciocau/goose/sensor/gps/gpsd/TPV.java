@@ -1,16 +1,27 @@
 package com.cciocau.goose.sensor.gps.gpsd;
 
 import com.google.gson.annotations.SerializedName;
+import systems.uom.common.USCustomary;
 import tech.units.indriya.ComparableQuantity;
 import tech.units.indriya.quantity.Quantities;
 import tech.units.indriya.unit.Units;
 
 import javax.measure.Quantity;
+import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Speed;
 import java.util.Optional;
 
+/**
+ * Represents the Time-Position-Velocity (TPV) report provided by gpsd.
+ *
+ * Refer to <a href="https://gpsd.gitlab.io/gpsd/gpsd_json.html">gpsd_json(5)</a>
+ */
 public class TPV extends GpsdResponse {
+
+    // NMEA mode (0=unknown, 1=no fix, 2=2D, 3=3D)
+    @SerializedName("mode")
+    private int mode;
 
     // Latitude in degrees: +/- signifies North/South.
     @SerializedName("lat")
@@ -52,12 +63,26 @@ public class TPV extends GpsdResponse {
     @SerializedName("speed")
     private Double speed;
 
-    public double getLat() {
-        return lat;
+    public NMEAMode getMode() {
+        switch (mode) {
+            case 3:
+                return NMEAMode.FIX_3D;
+            case 2:
+                return NMEAMode.FIX_2D;
+            case 1:
+                return NMEAMode.NO_FIX;
+            case 0:
+            default:
+                return NMEAMode.UNKNOWN;
+        }
     }
 
-    public double getLon() {
-        return lon;
+    public Quantity<Angle> getLat() {
+        return Quantities.getQuantity(lat, USCustomary.DEGREE_ANGLE);
+    }
+
+    public Quantity<Angle> getLon() {
+        return Quantities.getQuantity(lon, USCustomary.DEGREE_ANGLE);
     }
 
     public ComparableQuantity<Length> getLatError() {
@@ -84,8 +109,9 @@ public class TPV extends GpsdResponse {
         return climbRate;
     }
 
-    public Optional<Double> getTrack() {
-        return Optional.ofNullable(track);
+    public Optional<Quantity<Angle>> getTrack() {
+        return Optional.ofNullable(track)
+                .map(amount -> Quantities.getQuantity(amount, USCustomary.DEGREE_ANGLE));
     }
 
     public Optional<Quantity<Speed>> getSpeed() {

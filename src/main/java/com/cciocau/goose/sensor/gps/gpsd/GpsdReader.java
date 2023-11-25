@@ -4,20 +4,18 @@ import com.cciocau.goose.sensor.gps.GPSReader;
 import com.cciocau.goose.sensor.gps.GpsData;
 import com.cciocau.goose.sensor.gps.GpsPosition;
 import com.google.gson.Gson;
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
 import io.vavr.control.Either;
-import io.vavr.control.Option;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.stream.Stream;
 
 public class GpsdReader implements GPSReader {
     private final Gson gson = new Gson();
     private final InputStream inputStream;
+
+    GpsdReader(String input) {
+        this.inputStream = new ByteArrayInputStream(input.getBytes());
+    }
 
     public GpsdReader(InputStream inputStream) {
         this.inputStream = inputStream;
@@ -30,41 +28,33 @@ public class GpsdReader implements GPSReader {
             var stream = new BufferedReader(new InputStreamReader(inputStream));
 
             return stream.lines()
-                    .map(line -> deserialize(line, GpsdResponse.class))
-                    .filter(tuple -> tuple._2().filter(generic -> generic.getResponseClass().equalsIgnoreCase("tpv")).isDefined())
-                    .map(tuple -> tuple._2()
-                            .filter(generic -> generic.getResponseClass().equalsIgnoreCase("tpv"))
-                            .map(g -> deserialize(tuple._1(), TPV.class))
-                            .map(Tuple2::_2)
-                    )
-                    .filter(Option::isDefined)
-                    .map(Option::get)
+                    .map(line -> deserialize(line, TPV.class))
                     .filter(Either::isRight)
                     .map(Either::get)
+                    .filter(tpv -> "TPV".equalsIgnoreCase(tpv.getResponseClass()))
                     .map(this::toGpsData);
+
 
         } catch (Exception ex) {
             throw new IOException(ex);
         }
     }
+    private <T> Either<Exception, T> deserialize(String line, Class<T> type) {
+    try {
+        var generic = gson.fromJson(line, type);
+        return Either.right(generic);
 
-    private <T> Tuple2<String, Either<Exception, T>> deserialize(String line, Class<T> type) {
-        try {
-            var generic = gson.fromJson(line, type);
-
-            return Tuple.of(line, Either.right(generic));
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return Tuple.of(line, Either.left(exception));
-        }
+    } catch (Exception exception) {
+        return Either.left(new Exception("failed to deserialize line: " + line, exception));
     }
+}
 
     private GpsData toGpsData(TPV tpv) {
         var position = new GpsPosition(tpv.getLat(), tpv.getLon(), tpv.getLatError(), tpv.getLonError(), tpv.getAltitude(), tpv.getVerticalError());
 
-        var track = tpv.getTrack().orElse(null);
+        var track = tpv.getTrack();
         var speed = tpv.getSpeed();
 
-        return new GpsData(position, track, speed);
+        return new GpsData(tpv.getMode(), position, track, speed);
     }
 }

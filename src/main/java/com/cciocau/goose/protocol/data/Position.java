@@ -1,19 +1,25 @@
-package com.cciocau.goose.data;
+package com.cciocau.goose.protocol.data;
 
+import com.cciocau.goose.sensor.gps.GpsPosition;
 import tech.units.indriya.ComparableQuantity;
 
 import javax.measure.Quantity;
+import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
 
 public class Position {
-    private final double latitude;
-    private final double longitude;
+    private final Quantity<Angle> latitude;
+    private final Quantity<Angle> longitude;
     private final Quantity<Length> altitude;
 
     private final ComparableQuantity<Length> latitudeError;
     private final ComparableQuantity<Length> longitudeError;
 
-    public Position(double latitude, double longitude, Quantity<Length> altitude, ComparableQuantity<Length> latitudeError, ComparableQuantity<Length> longitudeError) {
+    public Position(GpsPosition gpsPosition) {
+        this(gpsPosition.getLatitude(), gpsPosition.getLongitude(), gpsPosition.getAltitude(), gpsPosition.getLatitudeError(), gpsPosition.getLongitudeError());
+    }
+
+    public Position(Quantity<Angle> latitude, Quantity<Angle> longitude, Quantity<Length> altitude, ComparableQuantity<Length> latitudeError, ComparableQuantity<Length> longitudeError) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
@@ -21,11 +27,11 @@ public class Position {
         this.longitudeError = longitudeError;
     }
 
-    public double getLatitude() {
+    public Quantity<Angle> getLatitude() {
         return latitude;
     }
 
-    public double getLongitude() {
+    public Quantity<Angle> getLongitude() {
         return longitude;
     }
 

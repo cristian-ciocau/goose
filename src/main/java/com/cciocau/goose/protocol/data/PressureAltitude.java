@@ -1,4 +1,4 @@
-package com.cciocau.goose.data;
+package com.cciocau.goose.protocol.data;
 
 public class PressureAltitude {
     private final int value;
