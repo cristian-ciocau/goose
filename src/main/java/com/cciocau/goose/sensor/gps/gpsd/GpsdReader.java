@@ -55,6 +55,6 @@ public class GpsdReader implements GPSReader {
         var track = tpv.getTrack();
         var speed = tpv.getSpeed();
 
-        return new GpsData(tpv.getMode(), position, track, speed);
+        return new GpsData(tpv.getTime(), tpv.getMode(), position, track, speed);
     }
 }

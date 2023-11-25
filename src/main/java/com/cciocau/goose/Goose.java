@@ -5,10 +5,12 @@ import com.cciocau.goose.output.*;
 import com.cciocau.goose.sensor.SensorManager;
 import com.cciocau.goose.sensor.adsb.AdsbTraffic;
 import com.cciocau.goose.sensor.adsb.dump1090.Dump1090Receiver;
+import com.cciocau.goose.sensor.gps.GpsConfig;
 import com.cciocau.goose.sensor.gps.GpsData;
 import com.cciocau.goose.efb.EFBType;
 import com.cciocau.goose.sensor.gps.gpsd.GpsdReceiver;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -58,6 +60,10 @@ public class Goose {
     }
 
     private void sendToEFB() {
+        if (!checkGPSValid()) {
+            gpsData = new GpsData();
+        }
+
         try {
             final List<EFBClient> clients = new ArrayList<>();
 
@@ -77,6 +83,14 @@ public class Goose {
         } catch (Exception ex) {
             logger.error("Failed to send data to EFB", ex);
         }
+    }
+
+    private boolean checkGPSValid() {
+        var config = new GpsConfig();
+
+        return gpsData.getTime().toInstant()
+                .plusSeconds(config.getFixValidDuration().toSeconds())
+                .isAfter(Instant.now());
     }
 
     public static void main(String[] args) {

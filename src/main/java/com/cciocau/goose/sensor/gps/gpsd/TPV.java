@@ -1,6 +1,8 @@
 package com.cciocau.goose.sensor.gps.gpsd;
 
 import com.google.gson.annotations.SerializedName;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import systems.uom.common.USCustomary;
 import tech.units.indriya.ComparableQuantity;
 import tech.units.indriya.quantity.Quantities;
@@ -10,6 +12,9 @@ import javax.measure.Quantity;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Speed;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -18,10 +23,14 @@ import java.util.Optional;
  * Refer to <a href="https://gpsd.gitlab.io/gpsd/gpsd_json.html">gpsd_json(5)</a>
  */
 public class TPV extends GpsdResponse {
+    private static final Logger logger = LogManager.getLogger(TPV.class);
 
     // NMEA mode (0=unknown, 1=no fix, 2=2D, 3=3D)
     @SerializedName("mode")
     private int mode;
+
+    @SerializedName("time")
+    private String time;
 
     // Latitude in degrees: +/- signifies North/South.
     @SerializedName("lat")
@@ -75,6 +84,19 @@ public class TPV extends GpsdResponse {
             default:
                 return NMEAMode.UNKNOWN;
         }
+    }
+
+    public ZonedDateTime getTime() {
+        try {
+            if (Objects.nonNull(time)) {
+                return ZonedDateTime.parse(time);
+            }
+
+        } catch (DateTimeParseException exception) {
+            logger.error("Failed to parse time - {}", time);
+        }
+
+        return ZonedDateTime.now();
     }
 
     public Quantity<Angle> getLat() {
