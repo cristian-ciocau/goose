@@ -88,9 +88,11 @@ public class Goose {
     private boolean checkGPSValid() {
         var config = new GpsConfig();
 
-        return gpsData.getTime().toInstant()
+        var recentPosition = gpsData.getTime().toInstant()
                 .plusSeconds(config.getFixValidDuration().toSeconds())
                 .isAfter(Instant.now());
+
+        return gpsData.is3DFix() && recentPosition;
     }
 
     public static void main(String[] args) {
